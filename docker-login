@@ -1,14 +1,15 @@
 #!/usr/bin/env sh
 
-ls -lha $HOME
+aws --version
+kubectl version
 
-# Update new secret for ECR
+echo "----------"
+export DOCKER_SERVER=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
+export DOCKER_PASSWORD=`aws ecr get-login --no-include-email | cut -d' ' -f6`
+echo "Docker Registry: ${DOCKER_SERVER}"
+echo "Docker Password: ${DOCKER_PASSWORD}"
+
+echo "----------"
+echo "Updating new secret for ECR..."
 kubectl delete secret aws-registry || true
-kubectl create secret docker-registry aws-registry \
-    --docker-username=AWS \
-    --docker-server=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com \
-    --docker-password=`aws ecr get-login --no-include-email | cut -d' ' -f6` \
-    --docker-email=no@email.here
-
-# Update ECR password
-kubectl patch serviceaccount default -p '{"imagePullSecrets":[{"name":"aws-registry"}]}'
+kubectl create secret docker-registry aws-registry --docker-username=AWS --docker-server=${DOCKER_SERVER} --docker-password=${DOCKER_PASSWORD} --docker-email=no
