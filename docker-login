@@ -5,7 +5,7 @@ kubectl version
 
 echo "----------"
 export DOCKER_SERVER=$(aws sts get-caller-identity --query Account --output text).dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com
-export DOCKER_PASSWORD=`aws ecr get-login --no-include-email | cut -d' ' -f6`
+export DOCKER_PASSWORD=`aws ecr get-login-password`
 echo "Docker Registry: ${DOCKER_SERVER}"
 echo "Docker Password: ${DOCKER_PASSWORD}"
 
